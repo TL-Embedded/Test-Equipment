@@ -3,6 +3,11 @@ import math
 import time
 
 class SDG2000():
+    # Warning, this is not a very good implementation.
+    # Parameters are often limited based on other parameters, so sequantially setting span, frequency, ect, works very poorly
+    # This needs to be refactored so that all thse are set simultaniously
+    # In addition to this, there is some wierdness about loading waves that I havent figured out (might be the same thing)
+
     def __init__(self, uri: str):
         self.scpi = SCPI.from_uri(uri)
         self.selected_channel = 1

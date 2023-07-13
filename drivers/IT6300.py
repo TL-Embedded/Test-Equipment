@@ -1,4 +1,6 @@
 from . import SCPI
+from typing import Callable
+import time
 
 class IT6300CH():
     def __init__(self, host: 'IT6300', index: int):
@@ -90,5 +92,39 @@ class IT6300():
             except:
                 pass
         return results
+    
+    def calibrate_current(self, get_current: Callable[[],float]):
+        # The output should pass through a DMM that can measure the test current
+
+        self.scpi.write(f"CAL:SEC 0, '6302'")
+        if int(self.scpi.query("CAL:SEC?")) != 0:
+            raise Exception("Security change failed")
+
+        for i in range(2):
+            self.scpi.write(f"CAL:CURR:LEV P{i+1}")
+            time.sleep(1.0)
+            current = get_current()
+            self.scpi.write(f"CAL:CURR {current:.3f}A")
+            time.sleep(0.1)
+
+        self.scpi.write("CAL:SAV")
+        self.scpi.write(f"CAL:SEC 1")
+
+    def calibrate_voltage(self, get_voltage: Callable[[],float]):
+        # The output should be metered by a DMM that can measure the test voltage
+
+        self.scpi.write(f"CAL:SEC 0, '6302'")
+        if int(self.scpi.query("CAL:SEC?")) != 0:
+            raise Exception("Security change failed")
+
+        for i in range(4):
+            self.scpi.write(f"CAL:VOLT:LEV P{i+1}")
+            time.sleep(1.0)
+            voltage = get_voltage()
+            self.scpi.write(f"CAL:VOLT {voltage:.3f}V")
+            time.sleep(0.1)
+
+        self.scpi.write("CAL:SAV")
+        self.scpi.write(f"CAL:SEC 1")
 
 
