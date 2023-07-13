@@ -1,7 +1,7 @@
-from drivers.TENMA72_132 import TENMA72_132
-from drivers.HDM3000 import HDM3000
-from drivers.IT6300 import IT6300
-from drivers.SDG2000 import SDG2000
+from equipment.TENMA72_132 import TENMA72_132
+from equipment.HDM3000 import HDM3000
+from equipment.IT6300 import IT6300
+from equipment.SDG2000 import SDG2000
 
 psu = IT6300()
 psu.is_present(True)
