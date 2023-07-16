@@ -1,8 +1,6 @@
 # Test Equipment
 
-Python drivers for my benchtop test equipment
-
-These provide simple python drivers for some of my instruments:
+These provide simple python drivers for some of my benchtop instruments:
  * HDM3000 Digital multimeter
  * IT6302 Power supply
  * SDG2082 Signal generator
@@ -26,7 +24,7 @@ dmm.close()
 Each of these instruments contains a reference to a `SCPI` object.
 
 The SCPI object provides an interface to send and recieve SCPI commands to the instrument. The following transport layers are supported:
- * TTY/Serial
+ * TTY Serial
  * TCP
  * UDP
 
@@ -50,7 +48,7 @@ SCPI sockets may be TCP or UDP. The argument specifies the destination port. The
 * `tcp://192.168.1.100` specifies a tcp socket
 * `udp://192.168.1.100` specifies a udp socket
 * `ip://192.168.1.100` lets the instrument select `tcp` or `udp`
-* `tcp://phoenix.local` address names are valid
+* `ip://phoenix.local` address names are valid
 * `udp://192.168.1.100:5025` explitictly selects port 5025
 
 ## Creating devices
@@ -84,9 +82,9 @@ The instruments are not individually documented. The methods are annotated, and 
 The following example shows some common patterns:
 
 ```python
-from instrument.IT6302 import IT6302
+from instrument.IT6300 import IT6300
 
-psu = IT6302()
+psu = IT6300()
 
 # This checks that your instrument responds to an identification request.
 # This is an important sanity check.
