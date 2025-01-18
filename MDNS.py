@@ -57,7 +57,7 @@ def decode_name(buffer: bytes, offset: int = 0) -> tuple[str, int]:
 def encode_question(name: str, record_type: int):
     return encode_name(name) + struct.pack("!2H",
         record_type, # Type
-        CLASS_IN # | CLASS_UNICAST_REQ, # Class
+        CLASS_IN | CLASS_UNICAST_REQ, # Class
     )
 
 
@@ -110,7 +110,7 @@ def extract_mdns_answer(packet: bytes, name: str, type: int) -> str | None:
     except struct.error:
         return None
 
-class MdnsClient():
+class MDNS():
     def __init__(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -160,6 +160,6 @@ class MdnsClient():
         return self.query(service_type, RECORD_PTR, timeout=timeout, limit=limit)
 
 if __name__ == "__main__":
-    mdns = MdnsClient()
+    mdns = MDNS()
     for service_instance in mdns.list_services_instances("_scpi-raw._tcp.local"):
         print(service_instance)
