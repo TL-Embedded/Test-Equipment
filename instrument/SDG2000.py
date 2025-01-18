@@ -73,15 +73,19 @@ class SDG2000Wave():
             "RISE": f"{rise_seconds:f}S",
         })
     
-    def wave_builtin(self, name: str, true_arb: bool = False) -> 'SDG2000Wave':
+    def wave_builtin(self, name: str) -> 'SDG2000Wave':
         index = self._host._get_builtin_waves()[name]
         self._commands["ARWV"] = f"INDEX,{index}"
-        self._commands["SRATE"] = f"MODE,{'TARB' if true_arb else 'DDS'}"
+        self._commands["SRATE"] = f"MODE,DDS"
         return self
     
-    def wave_user(self, name: str, true_arb: bool = False) -> 'SDG2000Wave':
+    def wave_user(self, name: str) -> 'SDG2000Wave':
         self._commands["ARWV"] = f"NAME,{name}"
-        self._commands["SRATE"] = f"MODE,{'TARB' if true_arb else 'DDS'}"
+        self._commands["SRATE"] = f"MODE,DDS"
+        return self
+    
+    def sample_rate(self, sample_rate_hz: int, interpolate: bool = True):
+        self._commands["SRATE"] = f"MODE,TARB,VALUE,{sample_rate_hz},INTER,{'LINE' if interpolate else 'HOLD'}"
         return self
 
     def submit(self):
