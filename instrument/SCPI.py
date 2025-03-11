@@ -51,6 +51,7 @@ class SocketSCPI(SCPI):
         self._socket = socket.socket(socket.AF_INET, socket_type)
         if is_tcp:
             self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self._socket.setsockopt(socket.SOL_TCP, socket.TCP_NODELAY, 1)
         else:
             self._socket.bind(("0.0.0.0", port))
         self._socket.settimeout(1.0)
