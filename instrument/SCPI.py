@@ -1,4 +1,3 @@
-import serial
 import socket
 
 
@@ -10,7 +9,7 @@ class SCPI():
         self.write_bytes((command + "\n").encode())
 
     def read(self) -> str:
-        return self.read_bytes().decode()
+        return self.read_bytes().decode().strip()
     
     def query(self, command: str) -> str:
         self.write(command)
@@ -31,6 +30,9 @@ class SCPI():
 
 class SerialSCPI(SCPI):
     def __init__(self, path: str, baud: int):
+        # Defer loading of this module
+        # This avoids pyserial dependancy if not needed.
+        import serial
         self._port = serial.Serial(path, baud)
         self._port.timeout = 1.0
 
@@ -78,11 +80,10 @@ def from_uri(uri: str, baud: int = 9600, port: int = 5025, is_tcp: bool = True) 
         # assume the given object was already a scpi object
         return uri
 
-    scheme, address = uri.split("://")
-    if ":" in address:
-        address, args = address.split(':')
-    else:
-        args = None
+    components = uri.split(":")
+    scheme = components[0]
+    address = components[1]
+    args = components[2] if len(components) > 2 else None
 
     if scheme == "tty":
         if args:
@@ -90,6 +91,7 @@ def from_uri(uri: str, baud: int = 9600, port: int = 5025, is_tcp: bool = True) 
         return SerialSCPI(address, baud)
 
     if scheme in ["udp", "tcp", "ip"]:
+        address = address.removeprefix("//")
         if args:
             port = int(args)
         if scheme != "ip":
