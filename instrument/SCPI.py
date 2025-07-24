@@ -1,9 +1,8 @@
 import socket
 
-
 class SCPI():
     def __init__(self):
-        pass
+        self.is_binary_safe = False
 
     def write(self, command: str):
         self.write_bytes((command + "\n").encode())
@@ -30,9 +29,7 @@ class SCPI():
 
 class SerialSCPI(SCPI):
     def __init__(self, path: str, baud: int):
-        # Defer loading of this module
-        # This avoids pyserial dependancy if not needed.
-        import serial
+        import serial # pip install pyserial
         self._port = serial.Serial(path, baud)
         self._port.timeout = 1.0
 
@@ -74,6 +71,22 @@ class SocketSCPI(SCPI):
         self._socket.close()
 
 
+class VXISCPI(SCPI):
+    def __init__(self, address: str):
+        import vxi11 # pip install python-vxi11
+        self._inst = vxi11.Instrument(address)
+        self.is_binary_safe = True
+
+    def write_bytes(self, command: bytes):
+        self._inst.write_raw(command)
+
+    def read_bytes(self) -> bytes:
+        return self._inst.read_raw()
+
+    def close(self):
+        self._inst.close()
+
+
 def from_uri(uri: str, baud: int = 9600, port: int = 5025, is_tcp: bool = True) -> SCPI:
     
     if type(uri) != str:
@@ -89,6 +102,11 @@ def from_uri(uri: str, baud: int = 9600, port: int = 5025, is_tcp: bool = True) 
         if args:
             baud = int(args)
         return SerialSCPI(address, baud)
+    
+    if scheme == "vxi":
+        # Args are discarded
+        address = address.removeprefix("//")
+        return VXISCPI(address)
 
     if scheme in ["udp", "tcp", "ip"]:
         address = address.removeprefix("//")

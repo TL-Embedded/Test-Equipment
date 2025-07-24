@@ -46,7 +46,7 @@ class SDG2000Wave():
         })
     
     def wave_dc(self) -> 'SDG2000Wave':
-        self._set_basic_params({
+        return self._set_basic_params({
             "WVTP": "DC",
         })
 
@@ -157,17 +157,18 @@ class SDG2000():
         Uploads a user waveform. The waveform should be a list of sample points from -1.0 to 1.0
         The frequency and ampliude should be selected when the wave is loaded.
         '''
+        if not self.scpi.is_binary_safe:
+            raise Exception("SCPI transport layer is not binary safe. This is required for this command. Consider VXISCPI.")
+
         payload = bytearray()
         for p in points:
             n = math.floor(p * 0x7FFF)
-            n = self._sanitize_point(n) # required for early firmware.
             payload.append(n & 0xFF)
             payload.append((n >> 8) & 0xFF)
         command = f"C1:WVDT WVNM,{name},WAVEDATA,".encode()
         self.scpi.write_bytes(command + payload + bytes([0x0A]))
 
-        # Big yikes.
-        time.sleep(0.5)
+        time.sleep(0.5) # Yikes. This might need to be a funciton of the wave size.
         self._sync()
         
     def _sync(self):
@@ -178,18 +179,6 @@ class SDG2000():
     def _channel_command(self, command: str):
         self.scpi.write(f"{self._ch}:{command}")
         self._sync()
-
-    def _sanitize_point(self, n: int) -> int:
-        # Literally the dumbest garbage
-        # Having an 0x0A ('\n') within a datapoint causes the command to be truncated.
-        if (n & 0xFF00) == 0x0A00:
-            if n > 0x0A7F:
-                return 0x0B00
-            else:
-                return 0x09FF
-        if (n & 0x00FF) == 0x000A:
-            return n + 1
-        return n
 
     def _get_builtin_waves(self) -> dict[str, int]:
         if self._builtin_waves == None:
