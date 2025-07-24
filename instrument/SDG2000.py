@@ -134,7 +134,7 @@ class SDG2000():
         '''
         Warning: Changing the load impedance after setting the amplitude results in a changed amplitude (doubled or halved)
         '''
-        load = f"{load_ohms:.0f}" if type(load_ohms) is float else "HZ"
+        load = "HZ" if load_ohms == None else f"{load_ohms:.0f}"
         self._channel_command(f"OUTP {'ON' if is_on else 'OFF'},LOAD,{load}")
 
     def set_burst_cycles(self, period_seconds: float, cycles: int = 1):
