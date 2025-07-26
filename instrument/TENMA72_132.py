@@ -54,7 +54,7 @@ class TENMA72_132():
     @staticmethod
     def find_devices(max_devices: int = 1) -> list[str]:
         results = []
-        for data, _ in SCPI.broadcast_search(b"find_ka000", 18191):
+        for data, _ in broadcast_search(b"find_ka000", 18191):
             try:
                 text = data.decode().splitlines()
                 ip = text[0]
@@ -65,3 +65,18 @@ class TENMA72_132():
             except:
                 pass
         return results
+
+
+def broadcast_search(payload: bytes, port: int, source_ip: str = "0.0.0.0", source_port: int = 0, timeout: float = 0.5):
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.bind((source_ip, source_port))
+        s.settimeout(timeout)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        s.sendto(payload, ("255.255.255.255", port))
+        try:
+            while 1:
+                data, address = s.recvfrom(1024)
+                yield data, address
+        except TimeoutError:
+            return

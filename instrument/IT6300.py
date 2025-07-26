@@ -29,9 +29,7 @@ class IT6300CH():
 
 
 class IT6300():
-    def __init__(self, uri: str = None):
-        if uri == None:
-            uri = IT6300.find_devices()[0]
+    def __init__(self, uri: str = "ip://it6302.local"):
         self.scpi = SCPI.from_uri(uri)
         self.channels = [
             IT6300CH(self, i+1) for i in range(3)
@@ -77,21 +75,6 @@ class IT6300():
 
     def set_output(self, is_on: bool):
         self.scpi.write(f"CHAN:OUTP {1 if is_on else 0}")
-    
-    @staticmethod
-    def find_devices(max_devices: int = 1) -> list[str]:
-        results = []
-        for data, _ in SCPI.broadcast_search(b"find_it6300", 18191):
-            try:
-                text = data.decode().splitlines()
-                ip = text[0]
-                port = text[2]
-                results.append(f"tcp://{ip}:{port}")
-                if len(results) >= max_devices:
-                    break
-            except:
-                pass
-        return results
     
     def calibrate_current(self, get_current: Callable[[],float]):
         # The output should pass through a DMM that can measure the test current
