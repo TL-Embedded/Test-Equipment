@@ -27,6 +27,7 @@ The SCPI object provides an interface to send and recieve SCPI commands to the i
  * TTY Serial
  * TCP
  * UDP
+ * VXI11
 
 When calling a constructor for an instrument, a SCPI URI is used to specify the location and transport mechanism. The URI contains 3 components:
 1. Transport specifier
@@ -38,8 +39,8 @@ The general format is `<transport>://<address>[:<argument>]`
 ## TTY
 This specifies a COM port. The baud rate will be selected by the instrument, but can be overridden by the argument.
 
- * `tty://COM3` specifies a serial port on `COM3`
- * `tty://COM3:115200` explicitly selects 115200 baud.
+ * `tty:COM3` specifies a serial port on `COM3`
+ * `tty:COM3:115200` explicitly selects 115200 baud.
 
 ## Sockets
 
@@ -50,6 +51,12 @@ SCPI sockets may be TCP or UDP. The argument specifies the destination port. The
 * `ip://192.168.1.100` lets the instrument select `tcp` or `udp`
 * `ip://phoenix.local` address names are valid
 * `udp://192.168.1.100:5025` explitictly selects port 5025
+
+## VXI11
+
+VXI11 is a protocol over TCP supported by a lot of SCPI instruments. This has the advantage of being packetised.
+
+* `vxi://192.168.1.100` specifies a vxi11 interface to the given host
 
 ## Creating devices
 
