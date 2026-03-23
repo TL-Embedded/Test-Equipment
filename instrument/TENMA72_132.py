@@ -66,14 +66,24 @@ class TENMA72_132():
                 pass
         return results
 
+def find_broadcast_interface():
+    import sys, subprocess, re
+    if sys.platform.startswith("linux"):
+        output = subprocess.getoutput("ip addr")
+        source, broadcast = re.search(r"inet +([^\s]+)\/\d+ +brd +([^\s]+)", output).groups()
+        return source, broadcast
+    else:
+        # Windows
+        return ("0.0.0.0", "255.255.255.255")
 
 def broadcast_search(payload: bytes, port: int, source_ip: str = "0.0.0.0", source_port: int = 0, timeout: float = 0.5):
+    interface, broadcast_addr = find_broadcast_interface()
     import socket
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-        s.bind((source_ip, source_port))
+        s.bind((interface, source_port))
         s.settimeout(timeout)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        s.sendto(payload, ("255.255.255.255", port))
+        s.sendto(payload, (broadcast_addr, port))
         try:
             while 1:
                 data, address = s.recvfrom(1024)
